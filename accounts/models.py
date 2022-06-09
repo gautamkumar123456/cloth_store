@@ -5,8 +5,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, password2=None, **other_fields):
         """
-        Creates and saves a User with the given email, date of
-        birth and password.
+        Creates and saves a User with the given email,password and extra fields which are given User model.
         """
         if not email:
             raise ValueError('Users must have an email address')
@@ -22,8 +21,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None, paswword2=None, **other_fields):
         """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
+        Creates and saves a superuser with the given email,phone_no(required fields),and password.
         """
         user = self.create_user(
             email,
@@ -43,6 +41,9 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
+    '''
+    adding custom fields if we need or want.
+    '''
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=10)
@@ -60,12 +61,12 @@ class User(AbstractBaseUser):
         return self.first_name
 
     def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
+        """Does the user have a specific permission?"""
         # Simplest possible answer: Yes, always
         return self.is_admin
 
     def has_module_perms(self, app_label):
-        "Does the user have permissions to view the app `app_label`?"
+        """Does the user have permissions to view the app `app_label`?"""
         # Simplest possible answer: Yes, always
         return True
 
