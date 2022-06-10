@@ -1,4 +1,8 @@
 from django.db import models
+from django.dispatch import receiver
+from django.urls import reverse
+from django_rest_passwordreset.signals import reset_password_token_created
+from django.core.mail import send_mail
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
@@ -75,3 +79,33 @@ class User(AbstractBaseUser):
         # "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+
+"""
+Here reset-password-token-created has a signal through which password is receiving here in models file.
+"""
+
+
+@receiver(reset_password_token_created)
+def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
+    """
+    here it creates a plain text area where token of reset_password is available. From here this token passed
+    to send_mail method.
+    """
+
+    email_plaintext_message = "{}?token={}".format(reverse('password_reset:reset-password-request'),
+                                                   reset_password_token.key)
+
+    """
+    from here a token is send to mail which is assigned to that user.
+    """
+    send_mail(
+        # title:
+        "Password Reset for {title}".format(title="Some website title"),
+        # message:
+        email_plaintext_message,
+        # from:
+        "noreply@somehost.local",
+        # to:
+        [reset_password_token.user.email]
+    )
