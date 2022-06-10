@@ -21,6 +21,10 @@ def get_tokens_for_user(user):
 
 # Create your views here.
 
+"""
+User Registration view.
+"""
+
 
 class UserRegistration(APIView):
     def post(self, request, format=None):
@@ -30,6 +34,11 @@ class UserRegistration(APIView):
             token = get_tokens_for_user(user)
             return Response({"token": token, "msg": "done"}, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+"""
+User login view.
+"""
 
 
 class UserLogin(APIView):
@@ -47,15 +56,9 @@ class UserLogin(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileView(APIView):
-    '''
-    IsAuthenticated class used for verifying that user is must for this specified operation
-    '''
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format=None):
-        serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+"""
+View for change password
+"""
 
 
 class UserChangePasswordView(APIView):
@@ -69,5 +72,3 @@ class UserChangePasswordView(APIView):
         if serializer.is_valid(raise_exception=True):
             return Response({'msg': 'Password changed successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
