@@ -5,13 +5,11 @@ from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-<<<<<<< HEAD
+
 from accounts.serializer import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, \
     UserChangePasswordSerializer
-=======
 from .models import User
 from accounts.serializer import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer
->>>>>>> update_profile
 
 
 # generating custom token
@@ -64,22 +62,20 @@ class UserLogin(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 class UserProfileView(APIView):
-    '''
+    """
     IsAuthenticated class used for verifying that user is must for this specified operation
-    '''
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-=======
+
+
 """
 View for change password
 """
->>>>>>> reset-password
 
 
 class UserChangePasswordView(APIView):
@@ -93,10 +89,8 @@ class UserChangePasswordView(APIView):
         if serializer.is_valid(raise_exception=True):
             return Response({'msg': 'Password changed successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-<<<<<<< HEAD
 
 
-=======
 """"
 Using IsOwner class to implement in our UserProfile class to access only by authorized user.
 """
@@ -127,6 +121,3 @@ class UserProfile(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         return super(UserProfile, self).partial_update(request, *args, **kwargs)
->>>>>>> update_profile
-=======
->>>>>>> reset-password
