@@ -59,9 +59,9 @@ class UserProfileView(APIView):
 
 
 class UserChangePasswordView(APIView):
-    '''
+    """
        IsAuthenticated class used for verifying that user is must for this specified operation
-    '''
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
