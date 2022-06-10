@@ -1,9 +1,17 @@
 from rest_framework import serializers
 from .models import User
 
+"""
+Here we mainly used ModelSerializer.We use this because it is simple to use when we have to serialize the data present
+in our model. We get all data from our model by default.
+"""
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    """
+    write_only come in use when we update and create instance.This field is not going to serialize. 
+    """
 
     class Meta:
         model = User
@@ -11,6 +19,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    """
+    This method is used to validate our data which we use in this serializer class.
+    """
 
     def validate(self, data):
         password = data.get('password')
@@ -29,6 +41,11 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password']
+
+
+"""
+This serializer is used for viewing Profile
+"""
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

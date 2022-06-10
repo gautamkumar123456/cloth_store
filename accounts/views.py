@@ -1,11 +1,17 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+<<<<<<< HEAD
 from accounts.serializer import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, \
     UserChangePasswordSerializer
+=======
+from .models import User
+from accounts.serializer import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer
+>>>>>>> update_profile
 
 
 # generating custom token
@@ -33,6 +39,8 @@ class UserRegistration(APIView):
 
 
 class UserLogin(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -47,6 +55,7 @@ class UserLogin(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
 
+<<<<<<< HEAD
 class UserProfileView(APIView):
     '''
     IsAuthenticated class used for verifying that user is must for this specified operation
@@ -71,3 +80,35 @@ class UserChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+=======
+""""
+Using IsOwner class to implement in our UserProfile class to access only by authorized user.
+"""
+
+
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.id == request.user.id
+
+
+"""
+This is userprofile class in which we use ModelViewset. In this class we use different-different methods
+as per our requirement.  
+"""
+
+
+class UserProfile(viewsets.ModelViewSet):
+    permission_classes = [IsOwner]
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    lookup_field = 'pk'
+
+    def list(self, request, *args, **kwargs):
+        return super(UserProfile, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super(UserProfile, self).retrieve(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        return super(UserProfile, self).partial_update(request, *args, **kwargs)
+>>>>>>> update_profile
