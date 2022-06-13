@@ -1,10 +1,11 @@
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework import status, viewsets, permissions
+from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from .permissions import IsOwner
 
 from accounts.serializer import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, \
     UserChangePasswordSerializer
@@ -62,17 +63,6 @@ class UserLogin(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileView(APIView):
-    """
-    IsAuthenticated class used for verifying that user is must for this specified operation
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format=None):
-        serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-
-
 """
 View for change password
 """
@@ -89,16 +79,6 @@ class UserChangePasswordView(APIView):
         if serializer.is_valid(raise_exception=True):
             return Response({'msg': 'Password changed successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-""""
-Using IsOwner class to implement in our UserProfile class to access only by authorized user.
-"""
-
-
-class IsOwner(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj.id == request.user.id
 
 
 """
