@@ -29,8 +29,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY_VAL')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['my-cloth-store-app.herokuapp.com',
+ALLOWED_HOSTS = ['localhost',
+                 '127.0.0.1',
+                 'my-cloth-store-app.herokuapp.com',
                  'dev-cloth-storemy-app.herokuapp.com'
+
                  ]
 
 # Application definition
