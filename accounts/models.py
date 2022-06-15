@@ -1,8 +1,5 @@
 from django.db import models
-from django.dispatch import receiver
-from django.urls import reverse
-from django_rest_passwordreset.signals import reset_password_token_created
-from django.core.mail import send_mail
+from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
@@ -23,7 +20,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, paswword2=None, **other_fields):
+    def create_superuser(self, email, password=None, password2=None, **other_fields):
         """
         Creates and saves a superuser with the given email,phone_no(required fields),and password.
         """
@@ -40,17 +37,20 @@ class UserManager(BaseUserManager):
 
 # Create your models here.
 class User(AbstractBaseUser):
+    """
+    Use of AbstractBaseUser for customize User as per our requirements.
+    """
     email = models.EmailField(
         verbose_name='Email',
         max_length=255,
         unique=True,
     )
     '''
-    adding custom fields if we need or want.
+    adding custom fields if we need.
     '''
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    phone_no = models.CharField(max_length=10)
+    phone_no = PhoneNumberField(null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -58,7 +58,7 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'email'  # this field is for login purpose
     REQUIRED_FIELDS = ['phone_no']
 
     def __str__(self):
@@ -81,31 +81,3 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
-"""
-Here reset-password-token-created has a signal through which password is receiving here in models file.
-"""
-
-
-@receiver(reset_password_token_created)
-def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
-    """
-    here it creates a plain text area where token of reset_password is available. From here this token passed
-    to send_mail method.
-    """
-
-    email_plaintext_message = "{}?token={}".format(reverse('password_reset:reset-password-request'),
-                                                   reset_password_token.key)
-
-    """
-    from here a token is send to mail which is assigned to that user.
-    """
-    send_mail(
-        # title:
-        "Password Reset for {title}".format(title="Some website title"),
-        # message:
-        email_plaintext_message,
-        # from:
-        "noreply@somehost.local",
-        # to:
-        [reset_password_token.user.email]
-    )

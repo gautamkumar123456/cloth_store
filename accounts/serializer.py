@@ -20,15 +20,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-    """
-    This method is used to validate our data which we use in this serializer class.
-    """
-
     def validate(self, data):
+        """
+        This method is used to validate our data which we use in this serializer class.
+        """
         password = data.get('password')
         password2 = data.get('password2')
         if password != password2:
-            raise serializers.ValidationError("Password dosen't match")
+            raise serializers.ValidationError("Password doesn't match")
         return data
 
     def create(self, validated_data):
@@ -43,18 +42,19 @@ class UserLoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 
-"""
-This serializer is used for viewing Profile
-"""
-
-
 class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    This serializer is using for Profile based functionality.
+    """
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'phone_no', 'email']
 
 
 class UserChangePasswordSerializer(serializers.Serializer):
+    """
+    This serializer for change password functionality.
+    """
     password = serializers.CharField(max_length=200, style={'input_type': 'password'}, write_only=True)
     password2 = serializers.CharField(max_length=200, style={'input_type': 'password'}, write_only=True)
 
@@ -66,7 +66,7 @@ class UserChangePasswordSerializer(serializers.Serializer):
         password2 = data.get('password2')
         user = self.context.get('user')
         if password != password2:
-            raise serializers.ValidationError("Password and confirm password dosen't match")
-        user.set_password(password)
+            raise serializers.ValidationError("Password and confirm password doesn't match")
+        user.set_password(password)  # set_password convert our normal password format to hashable format
         user.save()
         return data
