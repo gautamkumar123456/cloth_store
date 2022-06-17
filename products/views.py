@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAdminUser
 from rest_framework import viewsets
-from rest_framework.response import Response
-
+from .filters import ProductFilter
+from django_filters import rest_framework as filters
 from .serializer import *
 from .models import *
 
@@ -17,18 +17,24 @@ class ProductViewId(viewsets.ModelViewSet):
 
 class ProductViews(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
+    queryset = Products.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = ProductFilter
+    """
+    Customize way to filter products
+    """
 
-    def list(self, request, *args, **kwargs):
-        category = self.request.query_params.get('category')
-        if category:
-            """
-            Filter method is used to search products category wise.
-            """
-            queryset = Products.objects.filter(category__category_name__iexact=category)
-        else:
-            queryset = Products.objects.all()
-        serializer = ProductSerializer(queryset, many=True)
-        return Response({'data': serializer.data, 'count': len(serializer.data)})
+    # def list(self, request, *args, **kwargs):
+    #     category = self.request.query_params.get('category')
+    #     if category:
+    #         """
+    #         Filter method is used to search products category wise.
+    #         """
+    #         queryset = Products.objects.filter(category__category_name__iexact=category)
+    #     else:
+    #         queryset = Products.objects.all()
+    #     serializer = ProductSerializer(queryset, many=True)
+    #     return Response({'data': serializer.data, 'count': len(serializer.data)})
 
 
 class CategoryView(viewsets.ModelViewSet):
@@ -65,4 +71,3 @@ class QualityView(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = QualityType.objects.all()
     serializer_class = QualitySerializer
-

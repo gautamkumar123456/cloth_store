@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
     'products',
+    'cart',
     'phonenumber_field',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
