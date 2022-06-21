@@ -4,8 +4,11 @@ from rest_framework.response import Response
 from .permissions import IsOwner
 from .serializer import *
 
-
 # Create your views here.
+"""
+---------------------------------------------------CART--------------------------------------------------------
+"""
+
 
 class CartView(viewsets.ModelViewSet):
     """
@@ -19,6 +22,11 @@ class CartView(viewsets.ModelViewSet):
         queryset = Cart.objects.filter(user=user, ordered=False)
         serializer = CartSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+"""
+-------------------------------------------------------CART_ITEMS-----------------------------------------------
+"""
 
 
 class CartItemView(viewsets.ModelViewSet):
@@ -103,3 +111,120 @@ class CartItemsUpdateView(viewsets.ModelViewSet):
             cart_items.save()
             return Response({'message': 'Item updated successfully'}, status=status.HTTP_202_ACCEPTED)
         return Response({'message': 'No Item with given id'}, status=status.HTTP_404_NOT_FOUND)
+
+
+"""
+-------------------------------------------------ADDRESS-------------------------------------------------------
+"""
+
+
+class AddressCreate(viewsets.ModelViewSet):
+    """
+    This class is used for creating address.
+    """
+    permission_classes = [IsOwner]
+    queryset = AddressUser.objects.all()
+    serializer_class = AddressSerializer
+    lookup_field = 'pk'
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+        area = data.get('area')
+        landmark = data.get('landmark')
+        city = data.get('city')
+        pincode = data.get('pincode')
+        address_create = AddressUser.objects.create(user=user, area=area, landmark=landmark, city=city, pincode=pincode)
+        serializer = AddressSerializer(address_create)
+        return Response({'data': serializer.data, 'msg': 'Address created successfully'})
+
+
+class AddressView(viewsets.ModelViewSet):
+    permission_classes = [IsOwner]
+    queryset = AddressUser.objects.all()
+    serializer_class = AddressSerializer
+    lookup_field = 'pk'
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        super(AddressView, self).retrieve(request, *args, **kwargs)
+
+        return Response(serializer.data)
+
+
+class AddressUpdate(viewsets.ModelViewSet):
+    """
+    This class for updating address .
+    """
+    permission_classes = [IsOwner]
+    queryset = AddressUser.objects.all()
+    serializer_class = AddressSerializer
+    lookup_field = 'pk'
+
+    def partial_update(self, request, *args, **kwargs):
+        super(AddressUpdate, self).partial_update(request, *args, **kwargs)
+        return Response({'message': ' Address updated successfully'}, status=status.HTTP_202_ACCEPTED)
+
+
+"""
+-----------------------------------------------------ORDER---------------------------------------------------
+"""
+
+
+class OrderCreate(viewsets.ModelViewSet):
+    """
+    This class is for creating new order.
+    """
+    permission_classes = [IsOwner]
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    lookup_field = 'pk'
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+        address = AddressUser.objects.get(id=data.get('address'))
+        cart = Cart.objects.filter(user=user, id=data.get('cart_id'), ordered=False).first()
+        """
+        Here Cart is filtered for checking that it is available or not.
+        """
+        if cart:
+            items = cart.cartitems_set.values_list('products__product_name', flat=True)
+            items = ",".join(items)
+            Order_obj = Order.objects.create(user=user, cart=cart, address=address, items=items)
+            cart.ordered = True
+            cart.save()
+            myData = OrderSerializer(Order_obj)
+            return Response({'data': myData.data, 'msg': 'Order has been placed'})
+        return Response({'msg': 'No cart is available'})
+
+
+class OrderView(viewsets.ModelViewSet):
+    """
+    This class is for specific order view by authorized user.
+    """
+    permission_classes = [IsOwner]
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    lookup_field = 'pk'
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        super(OrderView, self).retrieve(request, *args, **kwargs)
+        return Response(serializer.data)
+
+
+class OrderCancel(viewsets.ModelViewSet):
+    """
+    This class is for purpose of cancel an order.
+    """
+    permission_classes = [IsOwner]
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
+    lookup_field = 'pk'
+
+    def destroy(self, request, *args, **kwargs):
+        super(OrderCancel, self).destroy(request, *args, **kwargs)
+        return Response({'message': ' Order has been cancelled successfully'}, status=status.HTTP_202_ACCEPTED)

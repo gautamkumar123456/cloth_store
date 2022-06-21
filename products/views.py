@@ -12,11 +12,11 @@ from .models import *
 class ProductViewId(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = Products.objects.all()
-    serializer_class = ProductSerializerView
+    serializer_class = ProductSerializer
 
 
 class ProductViews(viewsets.ModelViewSet):
-    serializer_class = ProductSerializer
+    serializer_class = ProductSerializerView
     queryset = Products.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ProductFilter

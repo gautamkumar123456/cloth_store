@@ -56,14 +56,14 @@ class QualityType(models.Model):
 
 
 class Products(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE,null=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
     season = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=False)
     product_name = models.CharField(max_length=100)
-    product_img = models.ImageField(upload_to='product_img',null=False)
+    product_img = models.ImageField(upload_to='product_img', null=False)
     price = models.IntegerField(null=False)
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE,null=False)
-    size = models.ForeignKey(Size, on_delete=models.CASCADE,null=False)
-    color = models.ForeignKey(Color, on_delete=models.CASCADE,null=False)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=False)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE, null=False)
+    color = models.ForeignKey(Color, on_delete=models.CASCADE, null=False)
     quality = models.ForeignKey(QualityType, on_delete=models.CASCADE, null=False)
 
     def __str__(self):

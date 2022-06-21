@@ -7,12 +7,6 @@ Serializer class for all views.
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField()
-    season = serializers.StringRelatedField()
-    brand = serializers.StringRelatedField()
-    size = serializers.StringRelatedField()
-    color = serializers.StringRelatedField()
-    quality = serializers.StringRelatedField()
 
     class Meta:
         model = Products
