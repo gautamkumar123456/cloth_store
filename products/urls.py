@@ -3,8 +3,8 @@ from .views import *
 
 urlpatterns = [
     path('product_views/', ProductViews.as_view({'get': 'list'}), name='products'),
-    path('product_viewId/', ProductViewId.as_view({'get': 'list', 'post': 'create'}), name='products'),
-    path('product_viewId/<int:pk>', ProductViewId.as_view({'put': 'partial_update', 'post': 'destroy'}),
+    path('product_view_Id/', ProductViewId.as_view({'get': 'list', 'post': 'create'}), name='products'),
+    path('product_view_Id/<int:pk>', ProductViewId.as_view({'put': 'partial_update', 'post': 'destroy'}),
          name='product'),
     path('category_view/', CategoryView.as_view({'get': 'list', 'post': 'create'}), name='category'),
     path('category_view/<int:pk>', CategoryView.as_view({'put': 'partial_update', 'post': 'destroy'}), name='category'),

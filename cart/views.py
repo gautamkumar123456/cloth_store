@@ -122,7 +122,7 @@ class AddressCreate(viewsets.ModelViewSet):
     """
     This class is used for creating address.
     """
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner]
     queryset = AddressUser.objects.all()
     serializer_class = AddressSerializer
     lookup_field = 'pk'
@@ -130,13 +130,12 @@ class AddressCreate(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         user = request.user
         data = request.data
-        area = data.get('area')
-        landmark = data.get('landmark')
-        city = data.get('city')
-        pincode = data.get('pincode')
-        address_create = AddressUser.objects.create(user=user, area=area, landmark=landmark, city=city, pincode=pincode)
-        serializer = AddressSerializer(address_create)
-        return Response({'data': serializer.data, 'msg': 'Address created successfully'})
+        data['user'] = user.id
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'data': serializer.data, 'msg': 'Address has been created'})
+        return Response({'data': serializer.errors, 'msg': 'Some error has occurred'})
 
 
 class AddressView(viewsets.ModelViewSet):
@@ -204,7 +203,7 @@ class OrderView(viewsets.ModelViewSet):
     """
     This class is for specific order view by authorized user.
     """
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     lookup_field = 'pk'
@@ -226,5 +225,19 @@ class OrderCancel(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def destroy(self, request, *args, **kwargs):
-        super(OrderCancel, self).destroy(request, *args, **kwargs)
-        return Response({'message': ' Order has been cancelled successfully'}, status=status.HTTP_202_ACCEPTED)
+        user = request.user
+        data = kwargs['pk']
+        input_data = request.data
+        cart_value = input_data['cart_id']
+        order = Order.objects.filter(user=user, id=data).first()
+        if order:
+            self.check_object_permissions(request, order)
+            cart = Cart.objects.filter(user=user, id=cart_value, ordered=True).first()
+            if cart:
+                super(OrderCancel, self).destroy(request, *args, **kwargs)
+
+                cart.ordered = False
+                cart.save()
+                return Response({'message': ' Order has been cancelled successfully'}, status=status.HTTP_202_ACCEPTED)
+            return Response({'msg': 'No Cart is available'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'msg': 'No Order is available'}, status=status.HTTP_404_NOT_FOUND)

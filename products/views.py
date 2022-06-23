@@ -2,6 +2,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework import viewsets
 from .filters import ProductFilter
 from django_filters import rest_framework as filters
+from rest_framework.filters import OrderingFilter
 from .serializer import *
 from .models import *
 
@@ -18,8 +19,9 @@ class ProductViewId(viewsets.ModelViewSet):
 class ProductViews(viewsets.ModelViewSet):
     serializer_class = ProductSerializerView
     queryset = Products.objects.all()
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend,OrderingFilter)
     filterset_class = ProductFilter
+    ordering_fields = ['price', 'size']
     """
     Customize way to filter products
     """
