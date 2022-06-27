@@ -1,10 +1,11 @@
+import datetime
+from collections import Counter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .permissions import IsOwner
 from .serializer import *
 
-# Create your views here.
 """
 ---------------------------------------------------CART--------------------------------------------------------
 """
@@ -241,3 +242,27 @@ class OrderCancel(viewsets.ModelViewSet):
                 return Response({'message': ' Order has been cancelled successfully'}, status=status.HTTP_202_ACCEPTED)
             return Response({'msg': 'No Cart is available'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'msg': 'No Order is available'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TrendingProducts(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        time_gap = datetime.date.today()-datetime.timedelta(days=7)
+        orders = Order.objects.filter(ordered_on__gte=time_gap)
+        dict_product = {}
+        for order in orders:
+            cart_items = CartItems.objects.filter(cart=order.cart)
+            for cart_item in cart_items:
+                if cart_item.products.id in dict_product:
+                    dict_product[cart_item.products.id] += cart_item.quantity
+                else:
+                    dict_product[cart_item.products.id] = cart_item.quantity
+        counting = Counter(dict_product)
+        trending_most = counting.most_common(2)
+        return Response(
+            {
+                'products': trending_most
+            }
+        )

@@ -16,5 +16,6 @@ urlpatterns = [
     # path('order-view/<int:pk>', OrderView.as_view({'get': 'retrieve'}), name='order-view'),
     path('order-views/', OrderView.as_view({'get': 'list'}), name='order-views'),
     path('order-cancel/<int:pk>', OrderCancel.as_view({'post': 'destroy'}), name='order-cancel'),
+    path('trending/', TrendingProducts.as_view({'get':'list'}), name='trending-product')
 
 ]

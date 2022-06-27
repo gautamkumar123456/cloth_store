@@ -102,6 +102,8 @@ class ResetPasswordConfirmView(ResetPasswordConfirm):
     """
 
     def post(self, request, *args, **kwargs):
+        requested_token = request.GET.get('token')
+        request.data['token'] = requested_token
         super(ResetPasswordConfirmView, self).post(request, *args, **kwargs)
         return Response({'status': 'OK', 'message': ' Password Reset Successfully'})
 

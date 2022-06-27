@@ -19,24 +19,9 @@ class ProductViewId(viewsets.ModelViewSet):
 class ProductViews(viewsets.ModelViewSet):
     serializer_class = ProductSerializerView
     queryset = Products.objects.all()
-    filter_backends = (filters.DjangoFilterBackend,OrderingFilter)
+    filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = ProductFilter
     ordering_fields = ['price', 'size']
-    """
-    Customize way to filter products
-    """
-
-    # def list(self, request, *args, **kwargs):
-    #     category = self.request.query_params.get('category')
-    #     if category:
-    #         """
-    #         Filter method is used to search products category wise.
-    #         """
-    #         queryset = Products.objects.filter(category__category_name__iexact=category)
-    #     else:
-    #         queryset = Products.objects.all()
-    #     serializer = ProductSerializer(queryset, many=True)
-    #     return Response({'data': serializer.data, 'count': len(serializer.data)})
 
 
 class CategoryView(viewsets.ModelViewSet):
