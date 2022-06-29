@@ -35,3 +35,11 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+
+
+class FavouritesSerializer(serializers.ModelSerializer):
+    products = serializers.CharField()
+
+    class Meta:
+        model = Favourites
+        fields = '__all__'

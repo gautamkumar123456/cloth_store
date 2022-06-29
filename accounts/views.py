@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.views import APIView
@@ -85,6 +85,7 @@ class UserProfile(viewsets.ModelViewSet):
     This is userprofile class in which we use ModelViewset. In this class we use different-different methods
     as per our requirement.
     """
+    permission_classes = [IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
 
@@ -102,8 +103,6 @@ class ResetPasswordConfirmView(ResetPasswordConfirm):
     """
 
     def post(self, request, *args, **kwargs):
-        requested_token = request.GET.get('token')
-        request.data['token'] = requested_token
         super(ResetPasswordConfirmView, self).post(request, *args, **kwargs)
         return Response({'status': 'OK', 'message': ' Password Reset Successfully'})
 
@@ -159,9 +158,6 @@ class PartialUpdate(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         super(PartialUpdate, self).partial_update(request, *args, **kwargs)
         return Response({'message': ' Profile updated successfully'}, status=status.HTTP_202_ACCEPTED)
-    """
-    Here we print customize message section
-    """
 
 
 class ViewProfile(viewsets.ModelViewSet):

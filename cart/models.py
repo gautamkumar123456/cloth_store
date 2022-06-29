@@ -45,3 +45,11 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.user}'s order"
+
+
+class Favourites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    products = models.ForeignKey(Products, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user}'s Favourites"

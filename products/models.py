@@ -67,4 +67,4 @@ class Products(models.Model):
     quality = models.ForeignKey(QualityType, on_delete=models.CASCADE, null=False)
 
     def __str__(self):
-        return f"{self.product_name} {str(self.season)}"
+        return self.product_name

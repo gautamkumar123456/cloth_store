@@ -13,9 +13,10 @@ urlpatterns = [
     path('address-views/', AddressView.as_view({'get': 'list'}), name='address-views'),
     path('address-update/<int:pk>', AddressUpdate.as_view({'put': 'partial_update'}), name='address-update'),
     path('order-create/', OrderCreate.as_view({'post': 'create'}), name='order-create'),
-    # path('order-view/<int:pk>', OrderView.as_view({'get': 'retrieve'}), name='order-view'),
     path('order-views/', OrderView.as_view({'get': 'list'}), name='order-views'),
     path('order-cancel/<int:pk>', OrderCancel.as_view({'post': 'destroy'}), name='order-cancel'),
-    path('trending/', TrendingProducts.as_view({'get':'list'}), name='trending-product')
+    path('trending/', TrendingProducts.as_view({'get': 'list'}), name='trending-product'),
+    path('favourites/', FavouritesView.as_view({'post': 'create', 'get': 'list'})),
+    path('favourites_del/<int:pk>', FavouritesView.as_view({'post': 'destroy'}))
 
 ]

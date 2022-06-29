@@ -37,12 +37,11 @@ class CartItemView(viewsets.ModelViewSet):
     permission_classes = [IsOwner]
     serializer_class = CartItemsSerializer
 
-    def list(self, request, *args, **kwargs):
-        user = request.user
+    def get_queryset(self):
+        user = self.request.user
         cart = Cart.objects.filter(user=user, ordered=False).first()
         queryset = CartItems.objects.filter(cart=cart)
-        serializer = CartItemsSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return queryset
 
 
 class CartItemsAddView(viewsets.ModelViewSet):
@@ -59,14 +58,18 @@ class CartItemsAddView(viewsets.ModelViewSet):
         data = request.data
         cart, _ = Cart.objects.get_or_create(user=user, ordered=False)
         product = Products.objects.get(id=data.get('product'))
-        price = product.price
-        quantity = data.get('quantity')
-        CartItems.objects.create(cart=cart, user=user, products=product, price=price, quantity=quantity)
-        CartItems(price=price, products=product)
-        CartItems.objects.filter(user=user, cart=cart.id)
-        cart.total_price += float(price) * int(quantity)
-        cart.save()
-        return Response({'success': 'Items added to your cart'})
+        if product:
+            price = product.price
+            quantity = data.get('quantity')
+            if quantity:
+                CartItems.objects.create(cart=cart, user=user, products=product, price=price, quantity=quantity)
+                CartItems(price=price, products=product)
+                CartItems.objects.filter(user=user, cart=cart.id)
+                cart.total_price += float(price) * int(quantity)
+                cart.save()
+                return Response({'success': 'Items added to your cart'})
+            return Response({'msg': "Enter Quantity"})
+        return Response({'msg': "Enter Product ID"})
 
 
 class CartItemsDeleteView(viewsets.ModelViewSet):
@@ -78,6 +81,7 @@ class CartItemsDeleteView(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def destroy(self, request, *args, **kwargs):
+        user = request.user
         data = kwargs['pk']  # here id of CartItems is storing
         cart_items = CartItems.objects.filter(id=data).first()
         if cart_items is not None:
@@ -85,7 +89,11 @@ class CartItemsDeleteView(viewsets.ModelViewSet):
             """
             this is use for checking user is available for that given cartItem or No.
             """
+            product_items = Cart.objects.filter(user=user, ordered=False).first()
             cart_items.delete()
+
+            product_items.total_price -= cart_items.price * cart_items.quantity
+            product_items.save()
             return Response({'message': 'Item deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         return Response({'message': 'No Item with given id'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -100,6 +108,7 @@ class CartItemsUpdateView(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def partial_update(self, request, *args, **kwargs):
+        user = request.user
         data = kwargs['pk']
         cart_items = CartItems.objects.filter(id=data).first()
         quantity = request.data.get('quantity')
@@ -108,8 +117,11 @@ class CartItemsUpdateView(viewsets.ModelViewSet):
             """
             this is use for checking user is available for that given cartItem or No.
             """
+            product_item = Cart.objects.filter(user=user, ordered=False).first()
             cart_items.quantity += quantity
             cart_items.save()
+            product_item.total_price += quantity*cart_items.price
+            product_item.save()
             return Response({'message': 'Item updated successfully'}, status=status.HTTP_202_ACCEPTED)
         return Response({'message': 'No Item with given id'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -230,18 +242,21 @@ class OrderCancel(viewsets.ModelViewSet):
         data = kwargs['pk']
         input_data = request.data
         cart_value = input_data['cart_id']
-        order = Order.objects.filter(user=user, id=data).first()
-        if order:
-            self.check_object_permissions(request, order)
-            cart = Cart.objects.filter(user=user, id=cart_value, ordered=True).first()
-            if cart:
-                super(OrderCancel, self).destroy(request, *args, **kwargs)
+        if cart_value:
+            order = Order.objects.filter(user=user, id=data).first()
+            if order:
+                self.check_object_permissions(request, order)
+                cart = Cart.objects.filter(user=user, id=cart_value, ordered=True).first()
+                if cart:
+                    super(OrderCancel, self).destroy(request, *args, **kwargs)
 
-                cart.ordered = False
-                cart.save()
-                return Response({'message': ' Order has been cancelled successfully'}, status=status.HTTP_202_ACCEPTED)
-            return Response({'msg': 'No Cart is available'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({'msg': 'No Order is available'}, status=status.HTTP_404_NOT_FOUND)
+                    cart.ordered = False
+                    cart.save()
+                    return Response({'message': ' Order has been cancelled successfully'},
+                                    status=status.HTTP_202_ACCEPTED)
+                return Response({'msg': 'No Cart is available'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'msg': 'No Order is available'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'msg': 'Please enter your cart ID'})
 
 
 class TrendingProducts(viewsets.ModelViewSet):
@@ -249,7 +264,7 @@ class TrendingProducts(viewsets.ModelViewSet):
     queryset = Order.objects.all()
 
     def list(self, request, *args, **kwargs):
-        time_gap = datetime.date.today()-datetime.timedelta(days=7)
+        time_gap = datetime.date.today() - datetime.timedelta(days=7)
         orders = Order.objects.filter(ordered_on__gte=time_gap)
         dict_product = {}
         for order in orders:
@@ -266,3 +281,30 @@ class TrendingProducts(viewsets.ModelViewSet):
                 'products': trending_most
             }
         )
+
+
+class FavouritesView(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsOwner]
+    serializer_class = FavouritesSerializer
+    lookup_field = 'pk'
+
+    def create(self, request, *args, **kwargs):
+        """
+        This is used for creating favourites.
+        """
+        user = request.user
+        data = request.data
+        favourite_products = Products.objects.filter(id=data.get('fav_product')).first()
+        if favourite_products:
+            Fav_obj = Favourites.objects.create(user=user, products=favourite_products)
+            myFav = FavouritesSerializer(Fav_obj)
+            return Response({'Fav_products': myFav.data, 'msg': 'Product added to Favourites'})
+        return Response({'msg': 'No Product is available for this ID'})
+
+    def get_queryset(self):
+        """
+        This is used for getting list of all favourites.
+        """
+        user = self.request.user
+        queryset = Favourites.objects.filter(user=user)
+        return queryset
