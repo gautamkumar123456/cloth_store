@@ -105,7 +105,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -170,3 +169,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
+
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PB_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SC_KEY')
+STRIPE_WEBHOOK_SECRET = os.environ.get('WEBHOOK_KEY')
+DOMAIN = os.environ.get('DOMAIN')

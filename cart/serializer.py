@@ -30,7 +30,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     user = serializers.CharField()
     address = serializers.CharField()
-    cart = serializers.CharField()
+    # cart = serializers.CharField()
 
     class Meta:
         model = Order

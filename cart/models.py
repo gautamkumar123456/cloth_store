@@ -42,6 +42,10 @@ class Order(models.Model):
     address = models.ForeignKey(AddressUser, on_delete=models.PROTECT)
     items = models.TextField()
     ordered_on = models.DateField(auto_now=True, blank=True)
+    payed = models.BooleanField(default=False)
+    payment_id = models.CharField(max_length=200, default=1)
+    cancel = models.BooleanField(default=False)
+    refund = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user}'s order"
