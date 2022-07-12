@@ -173,4 +173,4 @@ SIMPLE_JWT = {
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PB_KEY')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SC_KEY')
 STRIPE_WEBHOOK_SECRET = os.environ.get('WEBHOOK_KEY')
-DOMAIN = os.environ.get('DOMAIN')
+HOST = os.environ.get('HOST')
