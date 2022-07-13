@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import CartView,CartItemView,CartItemsUpdateView,CartItemsDeleteView,CartItemsAddView,AddressView,\
-    AddressUpdate,AddressCreate,OrderCreate,OrderView,OrderCancel,TrendingProducts,FavouritesView,success_payment,\
-    cancel_payment,stripe_webhook
+from .views import CartView, CartItemView, CartItemsUpdateView, CartItemsDeleteView, CartItemsAddView, AddressView, \
+    AddressUpdate, AddressCreate, OrderCreate, OrderView, OrderCancel, TrendingProducts, FavouritesView, \
+    success_payment, \
+    cancel_payment, stripe_webhook
 
 urlpatterns = [
     path('cart-view/', CartView.as_view({'get': 'list'}), name='cart'),
@@ -20,9 +21,7 @@ urlpatterns = [
     path('trending/', TrendingProducts.as_view({'get': 'list'}), name='trending-product'),
     path('favourites/', FavouritesView.as_view({'post': 'create', 'get': 'list'})),
     path('favourites_del/<int:pk>', FavouritesView.as_view({'post': 'destroy'})),
-    # path('checkout/', create_checkout_session, name='checkout'),
     path('success/', success_payment),
     path('cancel/', cancel_payment),
     path('webhook/', stripe_webhook),
-
 ]
